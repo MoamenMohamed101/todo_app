@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/modules/new_tasks/new_tasks_screen.dart';
 
 import '../modules/archive_tasks/archived_tasks_screen.dart';
@@ -25,13 +26,23 @@ class _TodoLayoutState extends State<TodoLayout> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    createDataBase();
+  }
+
+  Database? dataBase;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(titles[currentIndex!]),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          insertDataBase();
+        },
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -54,5 +65,46 @@ class _TodoLayoutState extends State<TodoLayout> {
       ),
       body: screens[currentIndex!],
     );
+  }
+
+  Future<String> getName() async {
+    return 'Moamen mohamed';
+  }
+
+  // To Create New DataBase and Create Tables in it
+  void createDataBase() async {
+    dataBase = await openDatabase(
+      'todo.db',
+      version: 1,
+      onCreate: (database, version) async {
+        print('create database');
+        // To create tables in database
+        database
+            .execute(
+                'CREATE TABLE tasks (id INTEGER PRIMARY KEY , title TEXT,date TEXT,time TEXT,status TEXT)')
+            .then((value) {
+          print('table created');
+        }).catchError((error) {
+          print('Error when creating table ${error.toString()}');
+        });
+      },
+      // To open database
+      onOpen: (database) {
+        print('open database');
+      },
+    );
+  }
+
+  void insertDataBase() {
+    dataBase!.transaction((txn) {
+      return txn
+          .rawInsert(
+              'INSERT INTO tasks(title , date , time , status) VALUES("first task","02222","654","new")')
+          .then((value) {
+        print('$value is inserted successfully');
+      }).catchError((error) {
+        print('Error when Inserting New Record ${error.toString()}');
+      });
+    });
   }
 }
