@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/modules/new_tasks/new_tasks_screen.dart';
+import 'package:todo_app/shared/components/components.dart';
 
 import '../modules/archive_tasks/archived_tasks_screen.dart';
 import '../modules/done_tasks/done_tasks_screen.dart';
@@ -13,6 +14,10 @@ class TodoLayout extends StatefulWidget {
 }
 
 class _TodoLayoutState extends State<TodoLayout> {
+  IconData fabIcon = Icons.edit;
+  bool? isBottomSheet = false;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+  var formKey = GlobalKey<FormState>();
   int? currentIndex = 0;
   List screens = [
     const NewTasksScreen(),
@@ -33,17 +38,112 @@ class _TodoLayoutState extends State<TodoLayout> {
 
   Database? dataBase;
 
+  var titleController = TextEditingController();
+  var timeController = TextEditingController();
+  var dateController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         title: Text(titles[currentIndex!]),
       ),
       floatingActionButton: FloatingActionButton(
+        // To toggle Between open and close showBottomSheet
         onPressed: () async {
-          insertDataBase();
+          // To close showBottomSheet
+          if (isBottomSheet == true) {
+            if (formKey.currentState!.validate()) {
+              Navigator.pop(context);
+              isBottomSheet = false;
+              setState(() {
+                fabIcon = Icons.edit;
+              });
+            }
+          } else {
+            // To open showBottomSheet
+            scaffoldKey.currentState!.showBottomSheet(
+              // The design in showBottomSheet
+              (context) => Container(
+                color: Colors.grey[100],
+                padding: const EdgeInsets.all(20),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      defaultFormField(
+                        controller: titleController,
+                        keyboard: TextInputType.text,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Enter title';
+                          }
+                          return null;
+                        },
+                        text: 'Task title',
+                        prefixIcon: Icons.title,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      defaultFormField(
+                        onTap: () {
+                          showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.now(),
+                          ).then((value) {
+                            timeController.text = value!.format(context);
+                            print(value.format(context));
+                          });
+                        },
+                        controller: timeController,
+                        keyboard: TextInputType.datetime,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Enter time';
+                          }
+                          return null;
+                        },
+                        text: 'Task Time',
+                        prefixIcon: Icons.watch_later_outlined,
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      defaultFormField(
+                        controller: dateController,
+                        keyboard: TextInputType.datetime,
+                        onTap: () {
+                          showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.parse('2023-12-01'),
+                          ).then((value) {});
+                        },
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Enter Date';
+                          }
+                          return null;
+                        },
+                        text: 'Task Date',
+                        prefixIcon: Icons.calendar_today,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+            isBottomSheet = true;
+            setState(() {
+              fabIcon = Icons.add;
+            });
+          }
         },
-        child: const Icon(Icons.add),
+        child: Icon(fabIcon),
       ),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (index) {
@@ -95,6 +195,7 @@ class _TodoLayoutState extends State<TodoLayout> {
     );
   }
 
+  // Insert data in DataBase
   void insertDataBase() {
     dataBase!.transaction((txn) {
       return txn
