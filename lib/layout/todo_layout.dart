@@ -1,10 +1,13 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/modules/new_tasks/new_tasks_screen.dart';
 import 'package:todo_app/shared/components/components.dart';
 
 import '../modules/archive_tasks/archived_tasks_screen.dart';
 import '../modules/done_tasks/done_tasks_screen.dart';
+import '../shared/components/constants.dart';
 
 class TodoLayout extends StatefulWidget {
   const TodoLayout({Key? key}) : super(key: key);
@@ -68,84 +71,91 @@ class _TodoLayoutState extends State<TodoLayout> {
             }
           } else {
             // To open showBottomSheet
-            scaffoldKey.currentState!.showBottomSheet(
-              elevation: 20,
-              // The design in showBottomSheet
-              (context) => Container(
-                //color: Colors.grey[100],
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      defaultFormField(
-                        controller: titleController,
-                        keyboard: TextInputType.text,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Enter title';
-                          }
-                          return null;
-                        },
-                        text: 'Task title',
-                        prefixIcon: Icons.title,
+            scaffoldKey.currentState!
+                .showBottomSheet(
+                  elevation: 20,
+                  // The design in showBottomSheet
+                  (context) => Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          defaultFormField(
+                            controller: titleController,
+                            keyboard: TextInputType.text,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Enter title';
+                              }
+                              return null;
+                            },
+                            text: 'Task title',
+                            prefixIcon: Icons.title,
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          defaultFormField(
+                            onTap: () {
+                              showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              ).then((value) {
+                                timeController.text = value!.format(context);
+                                print(value.format(context));
+                              });
+                            },
+                            controller: timeController,
+                            keyboard: TextInputType.datetime,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Enter time';
+                              }
+                              return null;
+                            },
+                            text: 'Task Time',
+                            prefixIcon: Icons.watch_later_outlined,
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          defaultFormField(
+                            controller: dateController,
+                            keyboard: TextInputType.datetime,
+                            onTap: () {
+                              showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime.parse('2023-12-01'),
+                              ).then((value) {
+                                dateController.text =
+                                    DateFormat.yMMMd().format(value!);
+                              });
+                            },
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Enter Date';
+                              }
+                              return null;
+                            },
+                            text: 'Task Date',
+                            prefixIcon: Icons.calendar_today,
+                          ),
+                        ],
                       ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      defaultFormField(
-                        onTap: () {
-                          showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.now(),
-                          ).then((value) {
-                            timeController.text = value!.format(context);
-                            print(value.format(context));
-                          });
-                        },
-                        controller: timeController,
-                        keyboard: TextInputType.datetime,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Enter time';
-                          }
-                          return null;
-                        },
-                        text: 'Task Time',
-                        prefixIcon: Icons.watch_later_outlined,
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      defaultFormField(
-                        controller: dateController,
-                        keyboard: TextInputType.datetime,
-                        onTap: () {
-                          showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime.parse('2023-12-01'),
-                          ).then((value) {
-                            dateController.text = value.toString();
-                            print(value.toString());
-                          });
-                        },
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Enter Date';
-                          }
-                          return null;
-                        },
-                        text: 'Task Date',
-                        prefixIcon: Icons.calendar_today,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
+                )
+                .closed
+                .then((value) {
+              isBottomSheet = false;
+              setState(() {
+                fabIcon = Icons.edit;
+              });
+            });
             isBottomSheet = true;
             setState(() {
               fabIcon = Icons.add;
@@ -172,12 +182,14 @@ class _TodoLayoutState extends State<TodoLayout> {
               icon: Icon(Icons.archive_outlined), label: 'Archived'),
         ],
       ),
-      body: screens[currentIndex!],
+      body: ConditionalBuilder(
+        condition: tasks!.length > 0,
+        builder: (context) => screens[currentIndex!],
+        fallback: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
-  }
-
-  Future<String> getName() async {
-    return 'Moamen mohamed';
   }
 
   // To Create New DataBase and Create Tables in it
@@ -199,6 +211,10 @@ class _TodoLayoutState extends State<TodoLayout> {
       },
       // To open database
       onOpen: (database) {
+        getDataFromDataBase(database).then((value) {
+          tasks = value;
+          print(value);
+        }).catchError((error) {});
         print('open database');
       },
     );
@@ -220,5 +236,9 @@ class _TodoLayoutState extends State<TodoLayout> {
         print('Error when Inserting New Record ${error.toString()}');
       });
     });
+  }
+
+  Future<List<Map>> getDataFromDataBase(database) async {
+    return await database!.rawQuery('SELECT * FROM tasks');
   }
 }
