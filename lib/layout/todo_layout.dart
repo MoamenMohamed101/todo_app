@@ -55,6 +55,11 @@ class _TodoLayoutState extends State<TodoLayout> {
           // To close showBottomSheet
           if (isBottomSheet == true) {
             if (formKey.currentState!.validate()) {
+              insertDataBase(
+                title: titleController.text,
+                date: dateController.text,
+                time: timeController.text,
+              );
               Navigator.pop(context);
               isBottomSheet = false;
               setState(() {
@@ -64,9 +69,10 @@ class _TodoLayoutState extends State<TodoLayout> {
           } else {
             // To open showBottomSheet
             scaffoldKey.currentState!.showBottomSheet(
+              elevation: 20,
               // The design in showBottomSheet
               (context) => Container(
-                color: Colors.grey[100],
+                //color: Colors.grey[100],
                 padding: const EdgeInsets.all(20),
                 child: Form(
                   key: formKey,
@@ -121,7 +127,10 @@ class _TodoLayoutState extends State<TodoLayout> {
                             initialDate: DateTime.now(),
                             firstDate: DateTime.now(),
                             lastDate: DateTime.parse('2023-12-01'),
-                          ).then((value) {});
+                          ).then((value) {
+                            dateController.text = value.toString();
+                            print(value.toString());
+                          });
                         },
                         validator: (value) {
                           if (value!.isEmpty) {
@@ -196,11 +205,15 @@ class _TodoLayoutState extends State<TodoLayout> {
   }
 
   // Insert data in DataBase
-  void insertDataBase() {
-    dataBase!.transaction((txn) {
+  Future insertDataBase({
+    String? title,
+    String? time,
+    String? date,
+  }) async {
+    return await dataBase!.transaction((txn) {
       return txn
           .rawInsert(
-              'INSERT INTO tasks(title , date , time , status) VALUES("first task","02222","654","new")')
+              'INSERT INTO tasks(title , date , time , status) VALUES("f$title","$date","$time","new")')
           .then((value) {
         print('$value is inserted successfully');
       }).catchError((error) {
