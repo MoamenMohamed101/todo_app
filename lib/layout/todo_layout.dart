@@ -17,11 +17,20 @@ class TodoLayout extends StatefulWidget {
 }
 
 class _TodoLayoutState extends State<TodoLayout> {
+  // variables {
   IconData fabIcon = Icons.edit;
   bool? isBottomSheet = false;
   var scaffoldKey = GlobalKey<ScaffoldState>();
   var formKey = GlobalKey<FormState>();
   int? currentIndex = 0;
+  Database? dataBase;
+  var titleController = TextEditingController();
+  var timeController = TextEditingController();
+  var dateController = TextEditingController();
+
+// }
+
+  // Lists to toggle between screens & appBars {
   List screens = [
     const NewTasksScreen(),
     const DoneTasksScreen(),
@@ -33,17 +42,12 @@ class _TodoLayoutState extends State<TodoLayout> {
     'Archived Tasks',
   ];
 
+// }
   @override
   void initState() {
     super.initState();
     createDataBase();
   }
-
-  Database? dataBase;
-
-  var titleController = TextEditingController();
-  var timeController = TextEditingController();
-  var dateController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +66,16 @@ class _TodoLayoutState extends State<TodoLayout> {
                 title: titleController.text,
                 date: dateController.text,
                 time: timeController.text,
-              );
-              Navigator.pop(context);
-              isBottomSheet = false;
-              setState(() {
-                fabIcon = Icons.edit;
+              ).then((value) {
+                getDataFromDataBase(dataBase).then((value) {
+                  Navigator.pop(context);
+                  setState(() {
+                    isBottomSheet = false;
+                    fabIcon = Icons.edit;
+                    tasks = value;
+                    print(value);
+                  });
+                }).catchError((error) {});
               });
             }
           } else {
