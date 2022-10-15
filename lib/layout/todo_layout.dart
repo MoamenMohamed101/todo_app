@@ -192,7 +192,7 @@ class _TodoLayoutState extends State<TodoLayout> {
         ],
       ),
       body: ConditionalBuilder(
-        condition: tasks!.length > 0,
+        condition: tasks!.isNotEmpty,
         builder: (context) => screens[currentIndex!],
         fallback: (context) => const Center(
           child: CircularProgressIndicator(),
@@ -221,9 +221,13 @@ class _TodoLayoutState extends State<TodoLayout> {
       // To open database
       onOpen: (database) {
         getDataFromDataBase(database).then((value) {
-          tasks = value;
+          setState(() {
+            tasks = value;
+          });
           print(value);
-        }).catchError((error) {});
+        }).catchError((error) {
+          print(error);
+        });
         print('open database');
       },
     );
@@ -238,7 +242,7 @@ class _TodoLayoutState extends State<TodoLayout> {
     return await dataBase!.transaction((txn) {
       return txn
           .rawInsert(
-              'INSERT INTO tasks(title , date , time , status) VALUES("f$title","$date","$time","new")')
+              'INSERT INTO tasks(title , date , time , status) VALUES("$title","$date","$time","new")')
           .then((value) {
         print('$value is inserted successfully');
       }).catchError((error) {
@@ -251,3 +255,15 @@ class _TodoLayoutState extends State<TodoLayout> {
     return await database!.rawQuery('SELECT * FROM tasks');
   }
 }
+
+// 1 - press on floatingbutton and enter my data
+
+// 2 - save data in insert method
+
+// 3 - use get method to show data in console tab
+
+// 4 - Make .then on get method to put data in list
+
+// 5 - Make NewTasksScreen get data from list and show it on screen
+
+// 6 - setState on tasks = value
