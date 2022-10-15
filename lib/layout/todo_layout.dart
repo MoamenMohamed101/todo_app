@@ -255,15 +255,3 @@ class _TodoLayoutState extends State<TodoLayout> {
     return await database!.rawQuery('SELECT * FROM tasks');
   }
 }
-
-// 1 - press on floatingbutton and enter my data
-
-// 2 - save data in insert method
-
-// 3 - use get method to show data in console tab
-
-// 4 - Make .then on get method to put data in list
-
-// 5 - Make NewTasksScreen get data from list and show it on screen
-
-// 6 - setState on tasks = value
