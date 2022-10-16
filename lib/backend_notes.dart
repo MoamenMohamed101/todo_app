@@ -1,4 +1,4 @@
-// CreatedataBase video
+// CreateDataBase video
 
 // 1 - Create dataBase with sqflite
 
@@ -28,6 +28,6 @@
 
 // 5 - Make .then on get method to put data in list(tasks)
 
-// 6 - Make NewTasksScreen get data from list and show it on screen put :  we must refrech tasksScreen to show my task
+// 6 - Make NewTasksScreen get data from list and show it on screen put :  we must refresh tasksScreen to show my task
 
 // 7 - setState on tasks = value
