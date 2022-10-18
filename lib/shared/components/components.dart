@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_app/shared/cubit/cubit.dart';
 
 defaultButton({
   double? width,
@@ -59,35 +60,63 @@ defaultFormField({
       onFieldSubmitted: onFieldSubmitted,
       onChanged: onChanged,
     );
-buildTaskItems(Map model) => Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 40,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 11),
-              child: Text('${model['date']}'),
+
+buildTaskItems(Map model, context) => Dismissible(
+      key: Key(model['id'].toString()),
+      onDismissed: (direction) {
+        AppCubit.get(context).deleteData(id: model['id']);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 40,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 11),
+                child: Text('${model['date']}'),
+              ),
             ),
-          ),
-          const SizedBox(
-            width: 20,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${model['title']}',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            const SizedBox(
+              width: 20,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${model['title']}',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${model['time']}',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
               ),
-              Text(
-                '${model['time']}',
-                style: const TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(
+              width: 20,
+            ),
+            IconButton(
+              onPressed: () {
+                AppCubit.get(context)
+                    .updateData(status: 'done', id: model['id']);
+              },
+              icon: const Icon(Icons.check_box),
+              color: Colors.green,
+            ),
+            IconButton(
+              onPressed: () {
+                AppCubit.get(context)
+                    .updateData(status: 'archived', id: model['id']);
+              },
+              icon: const Icon(Icons.archive),
+              color: Colors.black45,
+            ),
+          ],
+        ),
       ),
     );

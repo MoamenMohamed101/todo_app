@@ -1,3 +1,4 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app/shared/components/components.dart';
@@ -12,14 +13,33 @@ class NewTasksScreen extends StatelessWidget {
     AppCubit cubit = AppCubit.get(context);
     return BlocConsumer<AppCubit, AppStates>(
       builder: (BuildContext context, state) {
-        return ListView.separated(
-          itemBuilder: (context, index) => buildTaskItems(cubit.tasks![index]),
-          separatorBuilder: (context, index) => Container(
-            width: double.infinity,
-            height: 1,
-            color: Colors.grey[300],
+        return ConditionalBuilder(
+          condition: cubit.newTasks!.isNotEmpty,
+          builder: (context) => ListView.separated(
+            itemBuilder: (context, index) =>
+                buildTaskItems(cubit.newTasks![index], context),
+            separatorBuilder: (context, index) => Container(
+              width: double.infinity,
+              height: 1,
+              color: Colors.grey[300],
+            ),
+            itemCount: cubit.newTasks!.length,
           ),
-          itemCount: cubit.tasks!.length,
+          fallback: (context) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.menu, size: 100, color: Colors.grey),
+                Text(
+                  'No Tasks yet , Please add some Tasks',
+                  style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
         );
       },
       listener: (BuildContext context, Object? state) {},
