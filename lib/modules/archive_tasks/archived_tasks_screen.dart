@@ -16,16 +16,16 @@ class ArchivedTasksScreen extends StatelessWidget {
     return BlocConsumer<AppCubit, AppStates>(
       builder: (BuildContext context, state) {
         return ConditionalBuilder(
-          condition: cubit.doneTasks!.isNotEmpty,
+          condition: cubit.archivedTasks!.isNotEmpty,
           builder: (context) => ListView.separated(
             itemBuilder: (context, index) =>
-                buildTaskItems(cubit.doneTasks![index], context),
+                buildTaskItems(cubit.archivedTasks![index], context),
             separatorBuilder: (context, index) => Container(
               width: double.infinity,
               height: 1,
               color: Colors.grey[300],
             ),
-            itemCount: cubit.doneTasks!.length,
+            itemCount: cubit.archivedTasks!.length,
           ),
           fallback: (context) => Center(
             child: Column(
