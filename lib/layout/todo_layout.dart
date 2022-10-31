@@ -153,8 +153,7 @@ class TodoLayout extends StatelessWidget {
             ),
             body: ConditionalBuilder(
               condition: state is! AppGetDataBaseLoadingStates,
-              builder: (context) =>
-                  cubit.screens[AppCubit.get(context).currentIndex!],
+              builder: (context) => cubit.screens[cubit.currentIndex!],
               fallback: (context) => const Center(
                 child: CircularProgressIndicator(),
               ),
