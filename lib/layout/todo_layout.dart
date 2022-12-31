@@ -138,7 +138,6 @@ class TodoLayout extends StatelessWidget {
             bottomNavigationBar: BottomNavigationBar(
               onTap: (index) {
                 AppCubit.get(context).changeIndex(index);
-                print(cubit.currentIndex);
               },
               type: BottomNavigationBarType.fixed,
               elevation: 0.0,
