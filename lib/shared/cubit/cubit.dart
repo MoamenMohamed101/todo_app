@@ -9,13 +9,13 @@ import '../../modules/new_tasks/new_tasks_screen.dart';
 
 class AppCubit extends Cubit<AppStates> {
   AppCubit() : super(AppInitialStates());
-  int? currentIndex = 0;
   Database? dataBase;
   IconData fabIcon = Icons.edit;
   bool? isBottomSheet = false;
   List<Map>? newTasks = [];
   List<Map>? doneTasks = [];
   List<Map>? archivedTasks = [];
+  int? currentIndex = 0;
   List screens = [
     const NewTasksScreen(),
     const DoneTasksScreen(),

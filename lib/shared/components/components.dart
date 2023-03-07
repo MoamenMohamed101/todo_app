@@ -65,6 +65,16 @@ buildTaskItems(Map model, context) => Dismissible(
       key: Key(model['id'].toString()),
       onDismissed: (direction) {
         AppCubit.get(context).deleteData(id: model['id']);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${model['title']} deleted successfully',
+              style: const TextStyle(fontSize: 20),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
       },
       child: Padding(
         padding: const EdgeInsets.all(20.0),
